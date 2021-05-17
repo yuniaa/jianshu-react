@@ -1,6 +1,49 @@
 import React, { Component } from 'react'
-import { HeaderWrapper, Logo, Nav, NavItem, NavSearch, Addition, Button, SearchWrapper } from './style'
+import { CSSTransition } from 'react-transition-group'
+import { connect } from 'react-redux'
+import { actionCreators } from './store'
+import {
+    HeaderWrapper,
+    Logo,
+    Nav,
+    NavItem,
+    NavSearch,
+    Addition,
+    Button,
+    SearchWrapper,
+    SearchInfo,
+    SearchInfoTitle,
+    SearchInfoSwitch,
+    SearchInfoItem,
+    SearchInfoList
+  }
+  from './style'
+
+
 class Header extends Component {
+
+  getListArea() {
+    if (this.props.focused) {
+      return (
+        <SearchInfo>
+          <SearchInfoTitle>
+            热门搜索
+            <SearchInfoSwitch>换一批</SearchInfoSwitch>
+          </SearchInfoTitle>
+          <SearchInfoList>
+          {
+            this.props.list.map((item)=> {
+              return   <SearchInfoItem key = {item}>{item}</SearchInfoItem>
+            })
+          }
+          </SearchInfoList>
+        </SearchInfo>
+      )
+    }else {
+      return null
+    }
+  }
+
   render() {
     return (
       <HeaderWrapper>
@@ -13,8 +56,20 @@ class Header extends Component {
             <i className = 'iconfont'>&#xe636;</i>
           </NavItem>
           <SearchWrapper>
-            <NavSearch placeholder= '搜索'></NavSearch>
-            <i className = 'iconfont'>&#xe617;</i>
+            <CSSTransition
+              timeout = { 200 }
+              in = {this.props.focused }
+              lassNames = 'slide'
+            >
+              <NavSearch
+                placeholder= '搜索'
+                className = { this.props.focused ? 'focused': ''}
+                onFocus = { this.props.handleInputFocus }
+                onBlur = { this.props.handleInputBlur }
+              ></NavSearch>
+            </CSSTransition>
+            <i className = { this.props.focused ? 'focused iconfont': 'iconfont'}>&#xe617;</i>
+            { this.getListArea() }
           </SearchWrapper>
         </Nav>
         <Addition>
@@ -28,5 +83,23 @@ class Header extends Component {
     )
   }
 }
+const mapStateToProps = (state) =>{
 
-export default Header
+  return {
+    focused: state.get('header').get('focused'),
+    list: state.get('header').get('list')
+  }
+}
+
+const mapDispathToProps = (dispatch) => {
+  return {
+    handleInputFocus() {
+      dispatch(actionCreators.getList())
+      dispatch(actionCreators.searchFocus())
+    },
+    handleInputBlur() {
+      dispatch(actionCreators.searchBlur())
+    }
+  }
+}
+export default connect(mapStateToProps, mapDispathToProps)(Header)
