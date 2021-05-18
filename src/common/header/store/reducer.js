@@ -2,9 +2,11 @@ import * as constants from './constants'
 import  { fromJS }  from 'immutable'
 const defaultState = fromJS({
   focused: false,
-  list: []
+  mouseIn: false,
+  list: [],
+  page: 1,
+  totalPage: 1
 })
-
 // eslint-disable-next-line
 export default( state=defaultState, action ) => {
   if(action.type === constants.SEARCH_FOCUS) {
@@ -15,7 +17,22 @@ export default( state=defaultState, action ) => {
   }
 
   if(action.type === constants.CHANGE_LIST) {
-    return state.set('list', action.data)
+    return state.merge({
+      list: action.data,
+      totalPage: action.totalPage
+    })
+  }
+
+  if(action.type === constants.MOUSE_ENTER) {
+    return state.set('mouseIn',true)
+  }
+
+  if(action.type === constants.MOUSE_LEAVE) {
+    return state.set('mouseIn',false)
+  }
+
+  if(action.type === constants.CHANGE_PAGE) {
+    return state.set('page', action.page)
   }
   return state
 }
